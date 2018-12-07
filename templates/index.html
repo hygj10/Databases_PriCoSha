@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+
+<body>
+    <a href="/login">Login</a>
+    <br>
+    <a href="/register">Register</a>
+
+    <table>
+        <th>Item ID</th>
+        <th>Email</th>
+        <th>Time</th>
+        <th>File Path</th>
+        <th>Item Name</th>
+        
+        {% for line in posts %}
+        <tr>
+            <td>{{line.item_id}}</td>
+            <td>{{line.email_post}}</td>
+            <td>{{line.post_time}}</td>
+            <td>{{line.file_path}}</td>
+            <td>{{line.item_name}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+
+</html>

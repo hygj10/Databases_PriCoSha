@@ -1,0 +1,167 @@
+<html>
+<head>
+
+</head>
+
+<body>
+    <form action="/post" method="POST">
+        <h1>Welcome {{email}}</h1>
+
+
+        <form action="/post" method="POST" style="background= green; font: " Arial", sans-serif; font-size: 30px;">
+            <h4> Post Here</h4>
+            <input type="text" name="item_name" placeholder="Content Name" required /> </br>
+            <input type="text" name="file_path" placeholder="File Path" /> </br>
+            <label for="public">Public:</label>
+            <input type="checkbox" name="public" placeholder="" /> </br>
+            <label for="public">Friend Group:</label>
+            <select name="friendg" id="friendg">
+                {% for line in fg %}
+                <option value={{line.fg_name}}> {{line.fg_name}} </option>
+                {% endfor %}
+            </select> <br>
+            <input type="submit" value=Post /> </br>
+        </form>
+    </form>
+
+    <style type="text/css">
+        table, th, td {
+            border: 1px solid black;
+        }
+    </style>
+
+    Here are the Friend Groups you own:
+
+    <table>
+        <th>Friend Group</th>
+        <th>Description</th>
+        <th>Add Friend</th>
+        <th>Remove Friend</th>
+
+        {% for line in fg %}
+        <tr>
+            <td>{{line.fg_name}}</td>
+            <td>{{line.description}}</td>
+
+            <td>
+                <form action="/addtofg" method="POST">
+                    <input type="text" name="fname" placeholder="Friend's First Name">
+                    <input type="text" name="lname" placeholder="Friend's Last Name">
+                    <input type="hidden" name="group" value="{{line.fg_name}}">
+                    <input type="submit" value="Add">
+                </form>
+            </td>
+            <td>
+                <form action="/remfromfg" method="POST">
+                    <input type="text" name="fname" placeholder="Friend's First Name">
+                    <input type="text" name="lname" placeholder="Friend's Last Name">
+                    <input type="hidden" name="group" value="{{line.fg_name}}">
+                    <input type="submit" id="remove" value="Remove">
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <br />
+    Create a Friend Group
+
+    <form action="/createfg" method="POST">
+        Name: <input type="text" name="name" placeholder="Name of Group" required /> </br>
+        Description: <input type="text" name="description" placeholder="What is this group about" required /> </br>
+        <input type="submit" value=Create />
+    </form>
+
+    Here are the posts visible to you:
+
+    <table>
+        <th>Item ID</th>
+        <th>Email of Poster</th>
+        <th>Time</th>
+        <th>File Path</th>
+        <th>Name</th>
+        <th>Tag</th>
+        <th>Rate </th>
+        <th>More Info </th>
+
+
+
+        {% for line in posts %}
+        <tr>
+            <td>{{line.item_id}}</td>
+            <td>{{line.email_post}}</td>
+            <td>{{line.post_time}}</td>
+            <td>{{line.file_path}}</td>
+            <td>{{line.item_name}}</td>
+
+
+            <td>
+                <form action="/tag" method="POST">
+                    <input type="hidden" name="contentid" value="{{line.item_id}}">
+                    <input type="text" name="taggee" placeholder="Username">
+                    <input type="submit" id="tag_butt" value="Tag">
+
+                </form>
+
+            </td>
+
+            <td>
+                <form action="/rate" method="POST">
+                    <input type="hidden" name="contentid" value="{{line.item_id}}">
+                    <input type="text" name="emoji" placeholder="emoji">
+                    <input type="submit" id="rate_" value="Rate">
+
+                </form>
+
+            </td>
+
+            <td>
+                <form action="/more_info" method="POST">
+                    <input type="hidden" name="contentid" value="{{line.item_id}}">
+                    <input type="submit" id="view_butt" value="View">
+                </form>
+            </td>
+
+
+
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <h3> Proposed Tags </h3>
+    <table>
+
+        <th> ID </th>
+        <th> Accept </th>
+        <th> Decline </th>
+
+        {% for line in proptags %}
+        <tr>
+            <td> {{line.item_id}} </td>
+            <td>
+                <form action="/accepttag" method="POST">
+                    <input type="hidden" name="contentid" value="{{line.item_id}}">
+                    <input type="submit" value="Accept">
+                </form>
+            </td>
+            <td>
+                <form action="/rejecttag" method="POST">
+                    <input type="hidden" name="contentid" value="{{line.item_id}}">
+                    <input type="submit" value="Reject">
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <br>
+
+    <br>
+    <a href="/logout">Logout</a>
+
+</body>
+
+
+</html>

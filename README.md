@@ -10,8 +10,8 @@ The file init1.py contains all the python code for this project with brief comme
 B.
 Features:
 * Login
-* View Public Content before Login
-* View Private Content after Login
+* View Public Contents before Login
+* View Private Contents after Login
 * View further information on posts (tag, rate)
 * Tag and Rate contents
 * Manage Tags (Accept/Reject)

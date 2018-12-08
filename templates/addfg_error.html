@@ -1,0 +1,23 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    {% if error %}
+    <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+    {% if "This user either already exists in the group or has the same name" in  error %}
+    <form action="/check_again" method="POST">
+        <input type="hidden" name="email" value="{{email}}">
+        <input type="hidden" name="fg_name" value="{{fg_name}}">
+        <input type="text" name="being_checked" placeholder="Username">
+        <input type="submit" id="check_butt" value="Check">
+
+    </form>
+    {% endif %}
+
+</body>
+</html>

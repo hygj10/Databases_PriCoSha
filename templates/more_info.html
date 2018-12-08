@@ -16,33 +16,37 @@
 
 </head>
 <body class="w3-light-grey w3-center">
-     <style type="text/css">
-        table, th, td {
-            border: 1px solid black;
-        }
-    </style>
-    <table>
-        <th>Tags</th>
+    <div class="w3-content w3-margin-top" style="max-width:1400px;">
+        <div class="w3-row-padding">
+            <style type="text/css">
+                table, th, td {
+                    border: 1px solid black;
+                }
+            </style>
+            <table>
+                <th>Tags</th>
 
-        {% for tag in tags %}
-        <tr>
-            <td>{{tag.fname}}<br />{{tag.lname}}</td>
-            
+                {% for tag in tags %}
+                <tr>
+                    <td>{{tag.fname}}<br />{{tag.lname}}</td>
 
-            {% endfor %}
-        </tr>
-    </table>
 
-    <table>
-        <th>Ratings</th>
-        {% for rate in ratings %}
-        <tr>
-        <td>
-            {{rate.emoji}}
-        </td>
-        </tr>
-        {% endfor %}
-    </table>
+                    {% endfor %}
+                </tr>
+            </table>
+
+            <table>
+                <th>Ratings</th>
+                {% for rate in ratings %}
+                <tr>
+                    <td>
+                        {{rate.emoji}}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            </div>
+        </div>
 </body>
 </html>
 

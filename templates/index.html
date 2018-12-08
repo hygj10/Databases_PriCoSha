@@ -2,21 +2,38 @@
 <html>
 
 <head>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        html, body, h1, h2, h3, h4, h5, h6 {
+            font-family: "Roboto", sans-serif
+        }
+    </style>
 </head>
 
-<body>
-    <a href="/login">Login</a>
+<body class="w3-light-grey w3-center">
+    <style type="text/css">
+        table, th, td {
+            border: 1px solid white;
+        }
+    </style>
+    <br />
+    <a class="w3-tag w3-teal w3-round" href="/login">Login</a>
     <br>
-    <a href="/register">Register</a>
-
-    <table>
+    <br />
+    <a class="w3-tag w3-teal w3-round" href="/register">Register</a>
+    <br />
+    <br />
+    <table class="w3-tag w3-teal w3-round w3-center">
         <th>Item ID</th>
         <th>Email</th>
         <th>Time</th>
         <th>File Path</th>
         <th>Item Name</th>
-        
+
         {% for line in posts %}
         <tr>
             <td>{{line.item_id}}</td>

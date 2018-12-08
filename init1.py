@@ -279,13 +279,21 @@ def post():
 @app.route('/createfg', methods=['GET', 'POST'])
 def createfg():
     email = session['email']
-    cursor = conn.cursor()
-    name = request.form['name']
+    fg_name = request.form['name']
     description = request.form['description']
+
+    cursor = conn.cursor()
+    check_fg = ('SELECT * FROM friengroup WHERE owner_email = %s '
+                  'AND fg_name = %s', (email, fg_name))
+    if (check_fg):
+        error = "You already created a Friend Group with this name."
+        cursor.close()
+        return render_template('tag_error.html', error=error)
+
     query = 'INSERT INTO friendgroup (fg_name, description, owner_email) VALUES (%s, %s, %s)'
-    cursor.execute(query, (name, description, email))
+    cursor.execute(query, (fg_name, description, email))
     query = 'INSERT INTO belong (email, fg_name, owner_email) VALUES (%s, %s, %s)'
-    cursor.execute(query, (email, name, email))
+    cursor.execute(query, (email, fg_name, email))
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))

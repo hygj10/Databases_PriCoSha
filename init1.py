@@ -206,11 +206,11 @@ def tag():
 #to accept tags from others
 @app.route('/accepttag', methods=['GET','POST'])
 def accepttags():
-	username = session['email']
+	email = session['email']
 	cursor = conn.cursor();
 	contentID = request.form['contentid']
 	query = 'UPDATE tag SET status = \'Approved\' WHERE item_id = %s AND email_tagged = %s'
-	cursor.execute(query, (contentID,username))
+	cursor.execute(query, (contentID, email))
 	conn.commit()
 	cursor.close();
 	return redirect(url_for('home'))
@@ -218,11 +218,11 @@ def accepttags():
 #to reject tags from others
 @app.route('/rejecttag', methods=['GET','POST'])
 def rejecttags():
-	username = session['email']
+	email = session['email']
 	cursor = conn.cursor();
 	contentID = request.form['contentid']
 	query = 'DELETE FROM tag WHERE item_id = %s AND email_tagged = %s'
-	cursor.execute(query, (contentID, username))
+	cursor.execute(query, (contentID, email))
 	conn.commit()
 	cursor.close();
 	return redirect(url_for('home'))
@@ -261,14 +261,14 @@ def post():
 #for creating a friend group
 @app.route('/createfg', methods=['GET', 'POST'])
 def createfg():
-    username = session['email']
+    email = session['email']
     cursor = conn.cursor()
     name = request.form['name']
     description = request.form['description']
     query = 'INSERT INTO friendgroup (fg_name, description, owner_email) VALUES (%s, %s, %s)'
-    cursor.execute(query, (name, description, username))
+    cursor.execute(query, (name, description, email))
     query = 'INSERT INTO belong (email, fg_name, owner_email) VALUES (%s, %s, %s)'
-    cursor.execute(query, (username, name, username))
+    cursor.execute(query, (email, name, email))
     conn.commit()
     cursor.close()
     return redirect(url_for('home'))

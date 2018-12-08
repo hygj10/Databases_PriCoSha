@@ -163,7 +163,7 @@ def rate():
 
     cursor = conn.cursor()
 
-    check_rate = ('SELECT * FROM rate WHERE email = %s '
+    check_rate = cursor.execute('SELECT * FROM rate WHERE email = %s '
                              'AND item_id = %s', (email, contentid))
     if (check_rate):
         error = "You already rated this content."
@@ -283,7 +283,7 @@ def createfg():
     description = request.form['description']
 
     cursor = conn.cursor()
-    check_fg = ('SELECT * FROM friengroup WHERE owner_email = %s '
+    check_fg = cursor.execute('SELECT * FROM friendgroup WHERE owner_email = %s '
                   'AND fg_name = %s', (email, fg_name))
     if (check_fg):
         error = "You already created a Friend Group with this name."

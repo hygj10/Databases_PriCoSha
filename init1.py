@@ -162,6 +162,15 @@ def rate():
     contentid = request.form['contentid']
 
     cursor = conn.cursor()
+
+    check_rate = ('SELECT * FROM rate WHERE email = %s '
+                             'AND item_id = %s', (email, contentid))
+    if (check_rate):
+        error = "You already rated this content."
+        cursor.close()
+        return render_template('tag_error.html', error=error)
+
+
     query = 'INSERT INTO rate(email, item_id, rate_time, emoji) ' \
             'VALUES(%s, %s, Now(), %s)'
     cursor.execute(query, (email, contentid, emoji))
@@ -189,8 +198,8 @@ def tag():
         return render_template('tag_error.html', error=error)
 
     already = cursor.execute('SELECT * FROM tag WHERE email_tagged = %s '
-                             'and email_tagger = %s AND item_id = %s', (taggee, tagger, contentid))
-
+                             'AND email_tagger = %s AND item_id = %s', (taggee, tagger, contentid))
+    #check if user was already tagged
     if (already):
         error = "You already tagged this user on this content."
         cursor.close()

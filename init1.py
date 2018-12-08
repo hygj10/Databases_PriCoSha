@@ -93,7 +93,7 @@ def registerAuth():
         cursor.close()
         return render_template('index.html')
 
-
+#home page once user logs in
 @app.route('/home')
 def home():
     user = session['email']
@@ -102,6 +102,7 @@ def home():
     cursor.execute(query, (user))
     fg = cursor.fetchall()
 
+    #get visible posts
     query = 'SELECT item_id, email_post, post_time, file_path, item_name' \
             ' FROM contentitem WHERE is_pub = TRUE OR item_id IN ' \
             '(SELECT item_id FROM share NATURAL JOIN belong WHERE email = %s) ' \
@@ -109,6 +110,7 @@ def home():
     cursor.execute(query, (user))
     posts = cursor.fetchall()
 
+    #get tags
     query = 'SELECT email_tagged, email_tagger, tagtime, item_id FROM tag WHERE item_id in (' \
             'SELECT item_id' \
             ' FROM contentitem WHERE is_pub = TRUE OR item_id IN ' \
@@ -132,17 +134,19 @@ def home():
     cursor.close()
     return render_template('home.html', email=user, fg=fg, posts=posts, tags=tags, ratings=ratings, proptags = proptags)
 
+#when users want more info about the post
 @app.route('/more_info', methods=['GET', 'POST'])
 def more_info():
 
     contentid = request.form['contentid']
     approved = "Approved"
     cursor = conn.cursor();
+    #select approved tags
     query = 'SELECT fname, lname FROM tag JOIN person on email_tagged = email WHERE item_id = %s AND ' \
             'status = \'Approved\''
     cursor.execute(query, (contentid))
     tags = cursor.fetchall()
-
+    #show ratings
     query = 'SELECT emoji, rate_time, item_id FROM rate WHERE item_id = %s'
     cursor.execute(query, (contentid))
     ratings = cursor.fetchall()
@@ -150,6 +154,7 @@ def more_info():
     cursor.close()
     return render_template('more_info.html', ratings=ratings, tags=tags)
 
+#to rate a post
 @app.route('/rate', methods=['GET', 'POST'])
 def rate():
     email = session['email']
@@ -164,6 +169,7 @@ def rate():
     cursor.close()
     return redirect(url_for('home'))
 
+#to tag someone
 @app.route('/tag', methods=['GET', 'POST'])
 def tag():
     tagger = session['email']
@@ -176,19 +182,20 @@ def tag():
                                  '(SELECT fg_name from share WHERE item_id = %s)', (taggee, contentid))
     check_pub = cursor.execute('SELECT * FROM contentitem WHERE is_pub = 1 and item_id = %s', (contentid))
 
+    #check if the user is part of the friend group or if the post is public
     if (not check_group and not check_pub):
-        error = "This user is not allowed to view this content."
+        error = "This user is not allowed to view this content or does not exist."
         cursor.close()
         return render_template('tag_error.html', error=error)
 
-    # if user is self tagging
+    # if the user is tagging oneself
     if taggee == tagger:
         status = "Approved"
 
-    # if user is tagging someone else
+    # if the user tagged someone (valid).
     else:
         status = "Pending"
-
+    #insert into database
     query = 'INSERT INTO tag(item_id, email_tagger, email_tagged, status, tagtime) ' \
             'VALUES(%s, %s, %s, %s, Now())'
     cursor.execute(query, (contentid, tagger, taggee, status))
@@ -196,6 +203,7 @@ def tag():
     cursor.close()
     return redirect(url_for('home'))
 
+#to accept tags from others
 @app.route('/accepttag', methods=['GET','POST'])
 def accepttags():
 	username = session['email']
@@ -207,6 +215,7 @@ def accepttags():
 	cursor.close();
 	return redirect(url_for('home'))
 
+#to reject tags from others
 @app.route('/rejecttag', methods=['GET','POST'])
 def rejecttags():
 	username = session['email']
@@ -217,7 +226,8 @@ def rejecttags():
 	conn.commit()
 	cursor.close();
 	return redirect(url_for('home'))
-        
+
+#to post
 @app.route('/post', methods=['GET', 'POST'])
 def post():
     email = session['email']
@@ -225,12 +235,13 @@ def post():
     content_name = request.form['item_name']
     file_path = request.form['file_path']
     public = 0
-
+    #if the post is public just add it right away to contentitem
     if request.form.get('public'):
         public = 1
         query = 'INSERT INTO contentitem (email_post, file_path, item_name, is_pub, post_time) ' \
                 'VALUES(%s, %s, %s, %s, Now())'
         cursor.execute(query, (email, file_path, content_name, public))
+    #if not, get the friend group, and insert data in contentitem and share
     else:
         query = 'INSERT INTO contentitem (email_post, file_path, item_name, is_pub, post_time) ' \
                 'VALUES(%s, %s, %s, %s, Now());'
@@ -247,6 +258,7 @@ def post():
     cursor.close()
     return redirect(url_for('home'))
 
+#for creating a friend group
 @app.route('/createfg', methods=['GET', 'POST'])
 def createfg():
     username = session['email']
@@ -261,7 +273,7 @@ def createfg():
     cursor.close()
     return redirect(url_for('home'))
 
-
+#to add someone to a friend group
 @app.route('/addtofg', methods=['GET', 'POST'])
 def addtofg():
     email = session['email']
@@ -270,16 +282,49 @@ def addtofg():
     lname = request.form['lname']
 
     cursor = conn.cursor()
+    #check if the name exists
+    exist = 'SELECT * FROM person WHERE fname = %s AND lname = %s'
+    if (not cursor.execute(exist, (fname, lname))):
+        error = "This name does not exist."
+        cursor.close()
+        return render_template('addfg_error.html', error=error)
 
 
-    query = 'INSERT INTO belong(email, owner_email, fg_name) ' \
-            'VALUES ((SELECT email FROM person WHERE fname = %s AND lname = %s) , %s, %s)'
-    cursor.execute(query, (fname, lname, email, fg_name))
+    query = 'SELECT * FROM belong WHERE email = ' \
+            '(SELECT email FROM person WHERE fname = %s AND lname = %s)'
+    #if name already exists in friend group, let user check again with email.
+    if (cursor.execute(query, (fname, lname))):
+        error = "This user either already exists in the group or has the same name " \
+                "as one of the members. If you wish to try again, type in the email of the user you " \
+                "would like to add."
+        cursor.close()
+        return render_template('addfg_error.html', error=error, email = email, fg_name = fg_name)
+    else:
+        query = 'INSERT INTO belong(email, owner_email, fg_name) ' \
+                'VALUES ((SELECT email FROM person WHERE fname = %s AND lname = %s) , %s, %s)'
+        cursor.execute(query, (fname, lname, email, fg_name))
     conn.commit()
     cursor.close()
 
     return redirect(url_for('home'))
 
+#if names are already in friend group, check the person's email
+@app.route('/check_again', methods=['GET', 'POST'])
+def check_again():
+    email = session['email']
+    user = request.form['being_checked']
+    fg_name = request.form['fg_name']
+    cursor = conn.cursor()
+    #check if email is in friendgroup, and if not return error message
+    query = 'SELECT * FROM belong WHERE email = %s '
+    if (cursor.execute(query, (user))):
+        error = "This user already exists."
+        cursor.close()
+        return render_template('addfg_error.html', error=error, email=email, fg_name=fg_name)
+    query = 'INSERT INTO belong(email, owner_email, fg_name) ' \
+            'VALUES (%s , %s, %s)'
+    cursor.execute(query, (user, email, fg_name))
+    return redirect(url_for('home'))
 
 @app.route('/remfromfg', methods=['GET', 'POST'])
 def remfromfg():
@@ -298,28 +343,6 @@ def remfromfg():
 
     return redirect(url_for('home'))
 
-@app.route('/select_blogger')
-def select_blogger():
-    #check that user is logged in
-    #username = session['username']
-    #should throw exception if username not found
-    
-    cursor = conn.cursor();
-    query = 'SELECT DISTINCT email FROM blog'
-    cursor.execute(query)
-    data = cursor.fetchall()
-    cursor.close()
-    return render_template('select_blogger.html', user_list=data)
-
-@app.route('/show_posts', methods=["GET", "POST"])
-def show_posts():
-    poster = request.args['poster']
-    cursor = conn.cursor();
-    query = 'SELECT ts, blog_post FROM blog WHERE email = %s ORDER BY ts DESC'
-    cursor.execute(query, poster)
-    data = cursor.fetchall()
-    cursor.close()
-    return render_template('show_posts.html', poster_name=poster, posts=data)
 
 @app.route('/logout')
 def logout():

@@ -141,11 +141,13 @@ def more_info():
     contentid = request.form['contentid']
     approved = "Approved"
     cursor = conn.cursor();
+
     #select approved tags
     query = 'SELECT fname, lname FROM tag JOIN person on email_tagged = email WHERE item_id = %s AND ' \
             'status = \'Approved\''
     cursor.execute(query, (contentid))
     tags = cursor.fetchall()
+    
     #show ratings
     query = 'SELECT emoji, rate_time, item_id FROM rate WHERE item_id = %s'
     cursor.execute(query, (contentid))
@@ -163,6 +165,7 @@ def rate():
 
     cursor = conn.cursor()
 
+    #check if this user already rated this content
     check_rate = cursor.execute('SELECT * FROM rate WHERE email = %s '
                              'AND item_id = %s', (email, contentid))
     if (check_rate):
@@ -252,12 +255,14 @@ def post():
     content_name = request.form['item_name']
     file_path = request.form['file_path']
     public = 0
+
     #if the post is public just add it right away to contentitem
     if request.form.get('public'):
         public = 1
         query = 'INSERT INTO contentitem (email_post, file_path, item_name, is_pub, post_time) ' \
                 'VALUES(%s, %s, %s, %s, Now())'
         cursor.execute(query, (email, file_path, content_name, public))
+
     #if not, get the friend group, and insert data in contentitem and share
     else:
         query = 'INSERT INTO contentitem (email_post, file_path, item_name, is_pub, post_time) ' \
@@ -283,6 +288,8 @@ def createfg():
     description = request.form['description']
 
     cursor = conn.cursor()
+
+    #check if the owner already has a friendgroup with the same name
     check_fg = cursor.execute('SELECT * FROM friendgroup WHERE owner_email = %s '
                   'AND fg_name = %s', (email, fg_name))
     if (check_fg):
@@ -317,6 +324,7 @@ def addtofg():
 
     query = 'SELECT * FROM belong WHERE email = ' \
             '(SELECT email FROM person WHERE fname = %s AND lname = %s)'
+
     #if name already exists in friend group, let user check again with email.
     if (cursor.execute(query, (fname, lname))):
         error = "This user either already exists in the group or has the same name " \
@@ -340,6 +348,7 @@ def check_again():
     user = request.form['being_checked']
     fg_name = request.form['fg_name']
     cursor = conn.cursor()
+
     #check if email is in friendgroup, and if not return error message
     query = 'SELECT * FROM belong WHERE email = %s '
     if (cursor.execute(query, (user))):
@@ -347,6 +356,8 @@ def check_again():
         cursor.close()
         return render_template('addfg_error.html', error=error, email=email, fg_name=fg_name)
     query = 'SELECT * FROM person WHERE email = %s '
+
+    #check if the person exists
     if (not cursor.execute(query, (user))):
         error = "This email does not exist."
         cursor.close()

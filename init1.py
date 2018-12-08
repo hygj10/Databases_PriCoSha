@@ -326,6 +326,7 @@ def check_again():
     cursor.execute(query, (user, email, fg_name))
     return redirect(url_for('home'))
 
+#remove from friend group
 @app.route('/remfromfg', methods=['GET', 'POST'])
 def remfromfg():
     email = session['email']

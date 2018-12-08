@@ -346,6 +346,12 @@ def check_again():
         error = "This user already exists."
         cursor.close()
         return render_template('addfg_error.html', error=error, email=email, fg_name=fg_name)
+    query = 'SELECT * FROM person WHERE email = %s '
+    if (not cursor.execute(query, (user))):
+        error = "This email does not exist."
+        cursor.close()
+        return render_template('addfg_error.html', error=error, email=email, fg_name=fg_name)
+
     query = 'INSERT INTO belong(email, owner_email, fg_name) ' \
             'VALUES (%s , %s, %s)'
     cursor.execute(query, (user, email, fg_name))

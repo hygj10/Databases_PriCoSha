@@ -188,6 +188,14 @@ def tag():
         cursor.close()
         return render_template('tag_error.html', error=error)
 
+    already = cursor.execute('SELECT * FROM tag WHERE email_tagged = %s '
+                             'and email_tagger = %s AND item_id = %s', (taggee, tagger, contentid))
+
+    if (already):
+        error = "You already tagged this user on this content."
+        cursor.close()
+        return render_template('tag_error.html', error=error)
+
     # if the user is tagging oneself
     if taggee == tagger:
         status = "Approved"
